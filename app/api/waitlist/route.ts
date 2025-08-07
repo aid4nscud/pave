@@ -1,19 +1,29 @@
-import { NextRequest, NextResponse } from "next/server";
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+import { NextResponse } from "next/server";
 import { getPool } from "@/lib/db";
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   const contentType = req.headers.get("content-type") || "";
-  let email = "";
-  let body: Record<string, string> = {};
-
-  if (contentType.includes("application/json")) {
-    body = await req.json();
-    email = body.email || "";
-  } else {
+  let parsed: Record<string, string> = {};
+  if (contentType.includes("application/json")) parsed = await req.json();
+  else if (contentType.includes("application/x-www-form-urlencoded")) {
+    const text = await req.text();
+    const params = new URLSearchParams(text);
+    params.forEach((v, k) => (parsed[k] = v));
+  } else if (contentType.includes("multipart/form-data")) {
     const form = await req.formData();
-    email = String(form.get("email") || "");
-    form.forEach((v, k) => (body[k] = String(v)));
+    form.forEach((v, k) => (parsed[k] = String(v)));
+  } else {
+    try {
+      parsed = await req.json();
+    } catch {
+      const text = await req.text();
+      const params = new URLSearchParams(text);
+      params.forEach((v, k) => (parsed[k] = v));
+    }
   }
+  const email = String(parsed.email || "");
 
   if (!email || !email.includes("@")) {
     return NextResponse.json({ ok: false, error: "invalid_email" }, { status: 400 });
@@ -27,10 +37,10 @@ export async function POST(req: NextRequest) {
        returning id`,
       [
         email.trim().toLowerCase(),
-        body.city || "",
-        body.segment || "",
-        body.timeline || "",
-        body && Object.keys(body).length ? body : null,
+        parsed.city || "",
+        parsed.segment || "",
+        parsed.timeline || "",
+        parsed && Object.keys(parsed).length ? parsed : null,
       ]
     );
     return NextResponse.json({ ok: true, id: rows[0]?.id });
