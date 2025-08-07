@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="200" viewBox="0 0 800 200" fill="none">
+  <defs>
+    <linearGradient id="lg" x1="0" y1="0" x2="800" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7a1d2d"/>
+      <stop offset="0.6" stop-color="#b91c1c"/>
+      <stop offset="1" stop-color="#f43f5e"/>
+    </linearGradient>
+  </defs>
+  <g>
+    <path d="M40 150 L40 60 C40 50 48 42 58 42 L110 42 C140 42 162 64 162 94 C162 124 140 146 110 146 L80 146 L80 150 Z M80 114 L108 114 C121 114 130 105 130 94 C130 83 121 74 108 74 L80 74 Z" fill="url(#lg)"/>
+    <path d="M210 150 L250 42 L290 150 L264 150 L258 132 L241 132 L235 150 Z M248 112 L253 96 L246 96 Z" fill="url(#lg)"/>
+    <path d="M330 150 L330 42 L368 42 L402 96 L436 42 L474 42 L474 150 L442 150 L442 99 L414 142 L390 142 L362 99 L362 150 Z" fill="url(#lg)"/>
+    <path d="M520 150 L520 42 L572 42 C607 42 634 68 634 96 C634 125 607 150 572 150 Z M560 118 L572 118 C589 118 602 108 602 96 C602 84 589 74 572 74 L560 74 Z" fill="url(#lg)"/>
+  </g>
+</svg>
+
+
