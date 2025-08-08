@@ -215,7 +215,7 @@ function WaitlistForm() {
             <div>
               <div className="text-sm text-muted-foreground">Your position</div>
               <div className="text-xl font-semibold">#{success.place} in line</div>
-              <div className="mt-1 text-sm text-muted-foreground">Confirmation sent to {success.email}</div>
+              <div className="mt-1 text-sm text-muted-foreground">We’ll follow up at {success.email}</div>
             </div>
           </div>
           <div className="mt-6 flex flex-wrap gap-3">
