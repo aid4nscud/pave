@@ -7,14 +7,13 @@ export async function POST(req: Request) {
   const contentType = req.headers.get("content-type") || "";
   let parsed: Record<string, string> = {};
   if (contentType.includes("application/json")) parsed = await req.json();
-  else if (contentType.includes("application/x-www-form-urlencoded")) {
+  else {
     const text = await req.text();
     const params = new URLSearchParams(text);
     params.forEach((v, k) => (parsed[k] = v));
-  } else if (contentType.includes("multipart/form-data")) {
-    const form = await req.formData();
-    form.forEach((v, k) => (parsed[k] = String(v)));
-  } else {
+  }
+  /* Fallback safety for misreported content-type */
+  if (!Object.keys(parsed).length) {
     try {
       parsed = await req.json();
     } catch {
