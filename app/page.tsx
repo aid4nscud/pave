@@ -1,6 +1,7 @@
 "use client";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, BarChart, Shield, Zap } from "lucide-react";
+import { ArrowRight, BarChart, Shield, Zap, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { EarningsSimulator } from "./sections/earnings-simulator";
 import { Aurora } from "./sections/Aurora";
@@ -188,8 +189,75 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 }
 
 function WaitlistForm() {
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState<{ id: number; email: string; place: number } | null>(null);
+  const [error, setError] = useState<string>("");
+
+  if (success) {
+    return (
+      <div className="rounded-2xl border border-border p-0 overflow-hidden bg-white">
+        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6">
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-primary text-white p-2">
+              <CheckCircle2 className="h-5 w-5" />
+            </div>
+            <div className="text-lg font-semibold">You’re on the waitlist</div>
+          </div>
+          <div className="mt-3 text-sm text-muted-foreground">We’ll reach out with next steps for your city.</div>
+        </div>
+        <div className="p-6">
+          <div className="flex items-center gap-6">
+            <div className="relative">
+              <div className="h-24 w-24 rounded-2xl bg-gradient-to-br from-primary/15 via-primary/10 to-transparent grid place-items-center">
+                <div className="text-3xl font-semibold text-foreground">{success.place}</div>
+              </div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">Your position</div>
+              <div className="text-xl font-semibold">#{success.place} in line</div>
+              <div className="mt-1 text-sm text-muted-foreground">Confirmation sent to {success.email}</div>
+            </div>
+          </div>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a href="#sim" className="inline-flex items-center justify-center rounded-xl btn btn-secondary px-4 py-2">Explore earnings</a>
+            <a href="#faq" className="inline-flex items-center justify-center rounded-xl border border-border px-4 py-2 hover:bg-muted">Read FAQs</a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <form action="/api/waitlist" method="post" className="rounded-2xl border border-border p-6 bg-white">
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setError("");
+        setLoading(true);
+        const form = e.currentTarget as HTMLFormElement;
+        const data = new FormData(form);
+        const payload = Object.fromEntries(data.entries());
+        try {
+          const res = await fetch("/api/waitlist", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const json = await res.json();
+          if (json?.ok && json?.id) {
+            const idNum = Number(json.id);
+            const base = 145;
+            const place = base + (Number.isFinite(idNum) ? idNum : 0);
+            setSuccess({ id: idNum, email: String(payload.email || ""), place });
+            form.reset();
+          } else setError("Something went wrong. Please try again.");
+        } catch {
+          setError("Network error. Please try again.");
+        } finally {
+          setLoading(false);
+        }
+      }}
+      className="rounded-2xl border border-border p-6 bg-white"
+    >
       <h3 className="text-xl font-semibold">Join the waitlist</h3>
       <div className="mt-6 grid md:grid-cols-2 gap-4">
         <input required name="email" type="email" placeholder="Email" className="w-full rounded-xl border border-border px-4 py-3 focus:outline-none focus:ring-4 focus:ring-[color-mix(in_oklab,var(--ring)_65%,transparent)]" />
@@ -204,8 +272,9 @@ function WaitlistForm() {
           <option value=">6m">6+ months</option>
         </select>
       </div>
-      <button type="submit" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary text-white px-5 py-3 hover:bg-primary-600 transition-colors">
-        Reserve my spot
+      {error ? <div className="mt-4 text-sm text-red-600">{error}</div> : null}
+      <button disabled={loading} type="submit" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary text-white px-5 py-3 hover:bg-primary-600 transition-colors disabled:opacity-60">
+        {loading ? "Submitting…" : "Reserve my spot"}
         <ArrowRight className="h-4 w-4" />
       </button>
     </form>
